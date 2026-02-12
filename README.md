@@ -2,26 +2,6 @@
 
 A simple project that runs **3 copies** of a FastAPI app behind an **Nginx reverse proxy** that load-balances requests across them.
 
-## Architecture
-
-```
-                        ┌─────────────┐
-  Client :80  ────────► │    Nginx    │
-                        │ (port 80)   │
-                        └──────┬──────┘
-                               │  round-robin
-                ┌──────────────┼──────────────┐
-                ▼              ▼              ▼
-          ┌──────────┐  ┌──────────┐  ┌──────────┐
-          │   app1   │  │   app2   │  │   app3   │
-          │  :8000   │  │  :8000   │  │  :8000   │
-          └──────────┘  └──────────┘  └──────────┘
-```
-
-- **Nginx** is the only container exposed to the host (port 80).
-- **app1, app2, app3** run on an internal Docker network — not reachable from outside.
-- Nginx forwards each request to the next app using **round-robin** load balancing.
-
 ## Project Structure
 
 ```
@@ -73,9 +53,7 @@ Nginx uses **round-robin** by default — it sends request 1 to app1, request 2 
 Every API response includes a `"container"` field showing which container handled it. Hit the health endpoint a few times to see it rotate:
 
 ```bash
-curl http://localhost/health
-curl http://localhost/health
-curl http://localhost/health
+$ for i in {1..10}; do curl http://localhost/health; echo; done
 ```
 
 You'll see different container IDs:
